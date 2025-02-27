@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>您好，管理员</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background: #f4f4f4;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: #2c3e50;
+            padding: 1rem 5%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: white;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 60px;
+            bottom: 0;
+            width: 250px;
+            background: #34495e;
+            padding: 2rem 0;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu a {
+            color: white;
+            text-decoration: none;
+            padding: 1rem 2rem;
+            display: block;
+            transition: background 0.3s;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background: #2c3e50;
+        }
+
+        .main-content {
+            margin-left: 250px;
+            margin-top: 60px;
+            padding: 2rem;
+        }
+
+        .section {
+            display: none;
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            color: white;
+            background: #3498db;
+        }
+
+        .btn:hover {
+            background: #2980b9;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .table th,
+        .table td {
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        .table th {
+            background: #f8f9fa;
+        }
+
+        .status-pending {
+            color: #f39c12;
+        }
+
+        .status-completed {
+            color: #27ae60;
+        }
+
+        .status-cancelled {
+            color: #e74c3c;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            margin-left: 5px;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+        /* 订单状态样式 */
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .status-pending {
+            background-color: #ffeeba;
+            color: #856404;
+        }
+
+        .status-paid {
+            background-color: #b8daff;
+            color: #004085;
+        }
+
+        .status-completed {
+            background-color: #c3e6cb;
+            color: #155724;
+        }
+
+        .status-cancelled {
+            background-color: #f5c6cb;
+            color: #721c24;
+        }
+
+        /* 操作按钮样式 */
+        .btn-complete {
+            background-color: #28a745;
+        }
+
+        .btn-complete:hover {
+            background-color: #218838;
+        }
+
+        .btn-cancel {
+            background-color: #dc3545;
+        }
+
+        .btn-cancel:hover {
+            background-color: #c82333;
+        }
+
+        .btn-disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        /* 在 style 标签中添加提示消息样式 */
+        .toast-message {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            padding: 16px 32px;
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            border-radius: 50px;
+            font-size: 16px;
+            z-index: 2000;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: center;
+            min-width: 200px;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .toast-message.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast-message.success {
+            background: rgba(76, 175, 80, 0.95);
+        }
+
+        .toast-message.success::before {
+            content: '✓';
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .toast-message.error {
+            background: rgba(244, 67, 54, 0.95);
+        }
+
+        .toast-message.error::before {
+            content: '✕';
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        @keyframes toastIn {
+            0% {
+                opacity: 0;
+                transform: translateX(-50%) translateY(100px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        @keyframes toastOut {
+            0% {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateX(-50%) translateY(100px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>您好！管理员</h1>
+        <button onclick="logout()" class="btn" style="background: #e74c3c;">退出登录</button>
+    </header>
+
+    <nav class="sidebar">
+        <ul class="sidebar-menu">
+            <li><a href="#" onclick="showSection('products')" class="active">商品管理</a></li>
+            <li><a href="#" onclick="showSection('services')">服务管理</a></li>
+            <li><a href="#" onclick="showSection('orders')">订单管理</a></li>
+        </ul>
+    </nav>
+
+    <main class="main-content">
+        <!-- 商品管理部分 -->
+        <section id="products-section" class="section active">
+            <h2>商品管理</h2>
+            <form id="product-form" onsubmit="addProduct(event)">
+                <div class="form-group">
+                    <label>商品名称</label>
+                    <input type="text" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label>商品描述</label>
+                    <textarea name="description" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>价格</label>
+                    <input type="number" name="price" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label>库存</label>
+                    <input type="number" name="stock" required>
+                </div>
+                <div class="form-group">
+                    <label>图片URL</label>
+                    <input type="url" name="image_url">
+                </div>
+                <div class="form-group">
+                    <label>分类</label>
+                    <select name="category">
+                        <option value="food">宠物食品</option>
+                        <option value="toy">宠物玩具</option>
+                        <option value="care">护理用品</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn">添加商品</button>
+            </form>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>名称</th>
+                        <th>价格</th>
+                        <th>库存</th>
+                        <th>分类</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="products-table">
+                    <!-- 商品列表将通过JavaScript动态加载 -->
+                </tbody>
+            </table>
+        </section>
+
+        <!-- 服务管理部分 -->
+        <section id="services-section" class="section">
+            <h2>服务管理</h2>
+            <form id="service-form" onsubmit="addService(event)">
+                <div class="form-group">
+                    <label>服务名称</label>
+                    <input type="text" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label>服务描述</label>
+                    <textarea name="description" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>价格</label>
+                    <input type="number" name="price" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label>时长</label>
+                    <input type="text" name="duration" required>
+                </div>
+                <button type="submit" class="btn">添加服务</button>
+            </form>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>名称</th>
+                        <th>价格</th>
+                        <th>时长</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="services-table">
+                    <!-- 服务列表将通过JavaScript动态加载 -->
+                </tbody>
+            </table>
+        </section>
+
+        <!-- 订单管理部分 -->
+        <section id="orders-section" class="section">
+            <h2>订单管理</h2>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>订单号</th>
+                        <th>用户</th>
+                        <th>商品/服务</th>
+                        <th>总金额</th>
+                        <th>状态</th>
+                        <th>创建时间</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="orders-table">
+                    <!-- 订单列表将通过JavaScript动态加载 -->
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <script>
+        // 显示不同部分
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.querySelectorAll('.sidebar-menu a').forEach(link => {
+                link.classList.remove('active');
+            });
+            document.getElementById(`${sectionId}-section`).classList.add('active');
+            event.target.classList.add('active');
+
+            // 加载对应的数据
+            if (sectionId === 'products') {
+                loadProducts();
+            } else if (sectionId === 'services') {
+                loadServices();
+            } else if (sectionId === 'orders') {
+                loadOrders();
+            }
+        }
+
+        // 加载商品列表
+        function loadProducts() {
+            fetch('/api/products')
+                .then(response => response.json())
+                .then(products => {
+                    const tbody = document.getElementById('products-table');
+                    tbody.innerHTML = products.map(product => `
+                        <tr>
+                            <td>${product.id}</td>
+                            <td>${product.name}</td>
+                            <td>¥${product.price}</td>
+                            <td>${product.stock}</td>
+                            <td>${getCategoryName(product.category)}</td>
+                            <td>
+                                <button onclick="editProduct(${product.id})" class="btn btn-primary">编辑</button>
+                                <button onclick="deleteProduct(${product.id})" class="btn btn-danger">删除</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                });
+        }
+
+        // 获取分类名称
+        function getCategoryName(category) {
+            const categories = {
+                'food': '食品',
+                'toy': '玩具',
+                'care': '护理',
+                'other': '其他'
+            };
+            return categories[category] || category;
+        }
+
+        // 删除商品
+        function deleteProduct(productId) {
+            if (confirm('确定要删除这个商品吗？')) {
+                fetch(`/api/products/${productId}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message) {
+                        showToast('商品已删除', 'success');
+                        loadProducts();
+                    } else {
+                        showToast(data.error, 'error');
+                    }
+                })
+                .catch(error => {
+                    showToast('删除失败，请重试', 'error');
+                });
+            }
+        }
+
+        // 添加商品
+        function addProduct(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const data = Object.fromEntries(formData.entries());
+            
+            fetch('/api/products', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.message) {
+                    showToast('商品添加成功', 'success');
+                    event.target.reset();
+                    loadProducts();
+                } else {
+                    showToast(result.error, 'error');
+                }
+            });
+        }
+
+        // 加载服务列表
+        function loadServices() {
+            fetch('/api/services')
+                .then(response => response.json())
+                .then(services => {
+                    const tbody = document.getElementById('services-table');
+                    tbody.innerHTML = services.map(service => `
+                        <tr>
+                            <td>${service.id}</td>
+                            <td>${service.name}</td>
+                            <td>¥${service.price}</td>
+                            <td>${service.duration}</td>
+                            <td>
+                                <button onclick="editService(${service.id})" class="btn btn-primary">编辑</button>
+                                <button onclick="deleteService(${service.id})" class="btn btn-danger">删除</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                });
+        }
+
+        // 删除服务
+        function deleteService(serviceId) {
+            if (confirm('确定要删除这个服务吗？')) {
+                fetch(`/api/services/${serviceId}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message) {
+                        showToast('服务已删除', 'success');
+                        loadServices();
+                    } else {
+                        showToast(data.error, 'error');
+                    }
+                })
+                .catch(error => {
+                    showToast('删除失败，请重试', 'error');
+                });
+            }
+        }
+
+        // 添加服务
+        function addService(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const data = Object.fromEntries(formData.entries());
+            
+            fetch('/api/services', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.message) {
+                    showToast('服务添加成功', 'success');
+                    event.target.reset();
+                    loadServices();
+                } else {
+                    showToast(result.error, 'error');
+                }
+            })
+            .catch(error => {
+                showToast('添加服务失败，请重试', 'error');
+            });
+        }
+
+        // 获取订单状态的中文名称
+        function getStatusName(status) {
+            const statusMap = {
+                'pending': '待处理',
+                'paid': '已支付',
+                'completed': '完成',
+                'cancelled': '取消',
+            };
+            return statusMap[status] || status;
+        }
+
+        // 加载订单列表
+        function loadOrders() {
+            fetch('/api/admin/orders')
+                .then(response => response.json())
+                .then(orders => {
+                    const tbody = document.getElementById('orders-table');
+                    tbody.innerHTML = orders.map(order => {
+                        // 根据订单状态决定显示哪些按钮
+                        let actionButtons = '';
+                        if (order.status === 'pending' || order.status === 'paid') {
+                            actionButtons = `
+                                <button onclick="updateOrderStatus(${order.id}, 'completed')" class="btn btn-complete">完成</button>
+                                <button onclick="updateOrderStatus(${order.id}, 'cancelled')" class="btn btn-cancel">取消</button>
+                            `;
+                        } else {
+                            actionButtons = `
+                                <button class="btn btn-disabled" disabled>已${getStatusName(order.status)}</button>
+                            `;
+                        }
+
+                        return `
+                            <tr>
+                                <td>${order.id}</td>
+                                <td>${order.username}</td>
+                                <td>
+                                    ${order.products ? `<div>商品：${order.products}</div>` : ''}
+                                    ${order.services ? `<div>服务：${order.services}</div>` : ''}
+                                </td>
+                                <td>¥${order.total_amount}</td>
+                                <td><span class="status-badge status-${order.status}">${getStatusName(order.status)}</span></td>
+                                <td>${new Date(order.create_time).toLocaleString()}</td>
+                                <td>${actionButtons}</td>
+                            </tr>
+                        `;
+                    }).join('');
+                });
+        }
+
+        // 更新订单状态
+        function updateOrderStatus(orderId, status) {
+            const confirmMessage = status === 'completed' ? '确定要完成这个订单吗？' : '确定要取消这个订单吗？';
+            if (!confirm(confirmMessage)) {
+                return;
+            }
+
+            fetch(`/api/orders/${orderId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ status })
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.message) {
+                    showToast('订单状态更新成功', 'success');
+                    loadOrders(); // 重新加载订单列表
+                } else {
+                    showToast(result.error, 'error');
+                }
+            })
+            .catch(error => {
+                showToast('操作失败，请重试', 'error');
+            });
+        }
+
+        // 退出登录
+        function logout() {
+            localStorage.removeItem('adminUsername');
+            localStorage.removeItem('isAdmin');
+            showToast('已退出登录', 'success');
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 1000);
+        }
+
+        // 页面加载时检查登录状态并加载商品列表
+        window.onload = function() {
+            // 检查是否是管理员登录
+            const isAdmin = localStorage.getItem('isAdmin');
+            const adminUsername = localStorage.getItem('adminUsername');
+            
+            if (!isAdmin || !adminUsername || adminUsername !== '2693045168') {
+                alert('请先登录管理员账号');
+                window.location.href = '/';
+                return;
+            }
+            
+            // 显示管理员用户名
+            document.querySelector('.header h1').textContent = `您好，管理员 - ${adminUsername}`;
+            
+            // 加载商品列表
+            loadProducts();
+        };
+
+        // 添加提示消息函数
+        function showToast(message, type = 'success') {
+            // 移除现有的提示
+            const existingToast = document.querySelector('.toast-message');
+            if (existingToast) {
+                existingToast.remove();
+            }
+
+            // 创建新提示
+            const toast = document.createElement('div');
+            toast.className = `toast-message ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            // 显示提示并添加动画
+            requestAnimationFrame(() => {
+                toast.classList.add('show');
+                toast.style.animation = 'toastIn 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+            });
+
+            // 自动隐藏
+            setTimeout(() => {
+                toast.style.animation = 'toastOut 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+                toast.addEventListener('animationend', () => {
+                    toast.remove();
+                });
+            }, 2000);
+        }
+
+        // 修改更新商品函数
+        function updateProduct(productId) {
+            const formData = new FormData(document.getElementById(`editProductForm${productId}`));
+            
+            fetch(`/api/products/${productId}`, {
+                method: 'PUT',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    showToast('商品更新成功', 'success');
+                    loadProducts();
+                    closeModal(`editProductModal${productId}`);
+                } else {
+                    showToast(data.error, 'error');
+                }
+            })
+            .catch(error => {
+                showToast('更新失败，请重试', 'error');
+            });
+        }
+
+        // 修改更新服务函数
+        function updateService(serviceId) {
+            const formData = new FormData(document.getElementById(`editServiceForm${serviceId}`));
+            
+            fetch(`/api/services/${serviceId}`, {
+                method: 'PUT',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    showToast('服务更新成功', 'success');
+                    loadServices();
+                    closeModal(`editServiceModal${serviceId}`);
+                } else {
+                    showToast(data.error, 'error');
+                }
+            })
+            .catch(error => {
+                showToast('更新失败，请重试', 'error');
+            });
+        }
+    </script>
+</body>
+</html> 

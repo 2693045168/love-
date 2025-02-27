@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>宠物商店</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background: #f4f4f4;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: #fff;
+            padding: 1rem 5%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 2rem;
+            color: #4CAF50;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: #666;
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: color 0.3s;
+            cursor: pointer;
+        }
+
+        .nav-links a:hover {
+            color: #4CAF50;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .cart-icon {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ff4444;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .main-content {
+            margin-top: 80px;
+            padding: 2rem 5%;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            color: #333;
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .products-grid, .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .card h3 {
+            font-size: 20px;
+            color: #333;
+            margin: 15px 0;
+        }
+
+        .card p {
+            color: #666;
+            margin-bottom: 1rem;
+            height: 60px;
+            overflow: hidden;
+        }
+
+        .card .price {
+            color: #ff8c37;
+            font-size: 24px;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+
+        .add-to-cart {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: #ff8c37;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .add-to-cart:hover {
+            background: #ff7518;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 140, 55, 0.3);
+        }
+
+        /* 购物车侧边栏样式 */
+        .cart-sidebar {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 400px;
+            height: 100vh;
+            background: white;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+            transition: right 0.3s;
+            z-index: 1001;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .cart-sidebar.active {
+            right: 0;
+        }
+
+        .cart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .close-cart {
+            cursor: pointer;
+            font-size: 1.5rem;
+        }
+
+        .cart-items {
+            margin-bottom: 2rem;
+        }
+
+        .cart-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .cart-item img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            margin-right: 1rem;
+        }
+
+        .cart-item-info {
+            flex: 1;
+        }
+
+        .cart-total {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin: 2rem 0;
+        }
+
+        .checkout-btn {
+            width: 100%;
+            padding: 1rem;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1rem;
+        }
+
+        .checkout-btn:hover {
+            background: #45a049;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .cart-total {
+            margin-top: 20px;
+            font-weight: bold;
+            text-align: right;
+            font-size: 1.2em;
+        }
+
+        .checkout-btn {
+            width: 100%;
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .checkout-btn:hover {
+            background-color: #45a049;
+        }
+
+        .order-card {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .order-card h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .order-card p {
+            margin: 5px 0;
+            color: #666;
+        }
+
+        /* 购物车项目样式 */
+        .cart-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .item-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .item-price {
+            display: flex;
+            justify-content: space-between;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .cart-total {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            text-align: right;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        /* 订单卡片样式 */
+        .order-card {
+            background: white;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .order-total {
+            color: #e74c3c;
+            font-weight: bold;
+            font-size: 1.1em;
+            margin: 10px 0;
+        }
+
+        .order-status {
+            color: #3498db;
+            font-weight: bold;
+        }
+
+        .order-time {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .empty-cart {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-style: italic;
+        }
+
+        .service-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: #ff8c37;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .service-icon i {
+            font-size: 32px;
+            color: white;
+        }
+
+        .card:hover .service-icon {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(255, 140, 55, 0.3);
+        }
+
+        /* 修改提示消息样式 */
+        .toast-message {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            padding: 16px 32px;
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            border-radius: 50px;
+            font-size: 16px;
+            z-index: 2000;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: center;
+            min-width: 200px;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .toast-message.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast-message.success {
+            background: rgba(76, 175, 80, 0.95);
+        }
+
+        .toast-message.success::before {
+            content: '✓';
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .toast-message.error {
+            background: rgba(244, 67, 54, 0.95);
+        }
+
+        .toast-message.error::before {
+            content: '✕';
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        /* 修改动画关键帧 */
+        @keyframes toastIn {
+            0% {
+                opacity: 0;
+                transform: translateX(-50%) translateY(100px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        @keyframes toastOut {
+            0% {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateX(-50%) translateY(100px);
+            }
+        }
+
+        /* 添加购物车动画效果 */
+        .add-to-cart-animation {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .add-to-cart-animation::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 20px;
+            opacity: 0;
+        }
+
+        .add-to-cart-animation.success::after {
+            animation: successPop 0.5s ease forwards;
+        }
+
+        @keyframes successPop {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0);
+            }
+            50% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1.2);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <a href="#" class="logo">LOVE宠物商店</a>
+        <nav class="nav-links">
+            <a onclick="showSection('products')">商品</a>
+            <a onclick="showSection('services')">服务</a>
+            <a onclick="showSection('orders')">我的订单</a>
+        </nav>
+        <div class="user-actions">
+            <span id="username"></span>
+            <div class="cart-icon" onclick="toggleCart()">
+                🛒
+                <span class="cart-count" id="cartCount">0</span>
+            </div>
+            <button onclick="logout()" style="padding: 0.5rem 1rem; background: #ff4444; color: white; border: none; border-radius: 5px; cursor: pointer;">退出登录</button>
+        </div>
+    </header>
+
+    <div class="main-content">
+        <section id="products-section">
+            <h2 class="section-title">商品列表</h2>
+            <div class="products-grid" id="productsGrid">
+                <!-- 商品将通过 JavaScript 动态加载 -->
+            </div>
+        </section>
+
+        <section id="services-section" style="display: none;">
+            <h2 class="section-title">服务项目</h2>
+            <div class="services-grid" id="servicesGrid">
+                <!-- 服务将通过 JavaScript 动态加载 -->
+            </div>
+        </section>
+
+        <section id="orders-section" style="display: none;">
+            <h2 class="section-title">我的订单</h2>
+            <div id="ordersContainer">
+                <!-- 订单将通过 JavaScript 动态加载 -->
+            </div>
+        </section>
+    </div>
+
+    <!-- 购物车侧边栏 -->
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h3>购物车</h3>
+            <span class="close-cart" onclick="toggleCart()">×</span>
+        </div>
+        <div id="cart-content">
+            <!-- 购物车内容将通过 JavaScript 动态加载 -->
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let cart = { products: [], services: [] };
+
+        // 页面加载时检查登录状态
+        window.onload = function() {
+            // 检查登录状态
+            const username = localStorage.getItem('username');
+            const userId = localStorage.getItem('userId');
+            
+            if (!username || !userId) {
+                window.location.href = '/';
+                return;
+            }
+            
+            // 显示用户名
+            document.getElementById('username').textContent = `您好，${username}`;
+            
+            // 加载商品和服务
+            loadProducts();
+            loadServices();
+            
+            // 加载购物车
+            loadCart();
+            
+            // 默认显示商品部分
+            showSection('products');
+        };
+
+        // 检查登录状态
+        function checkLoginStatus() {
+            const username = localStorage.getItem('username');
+            if (!username) {
+                window.location.href = '/';
+            } else {
+                currentUser = username;
+                document.getElementById('username').textContent = `欢迎, ${username}`;
+            }
+        }
+
+        // 加载商品
+        function loadProducts() {
+            fetch('/api/products')
+                .then(response => response.json())
+                .then(products => {
+                    const grid = document.getElementById('productsGrid');
+                    grid.innerHTML = products.map(product => `
+                        <div class="card">
+                            <img src="${product.image_url}" alt="${product.name}" onerror="this.src='/images/宠物食品.jpg'">
+                            <h3>${product.name}</h3>
+                            <p>${product.description}</p>
+                            <div class="price">¥${product.price}</div>
+                            <button class="add-to-cart" onclick="addToCart('product', ${product.id})">加入购物车</button>
+                        </div>
+                    `).join('');
+                });
+        }
+
+        // 加载服务
+        function loadServices() {
+            fetch('/api/services')
+                .then(response => response.json())
+                .then(services => {
+                    const grid = document.getElementById('servicesGrid');
+                    grid.innerHTML = services.map(service => {
+                        // 根据服务名称获取对应图标
+                        const icon = getServiceIcon(service.name);
+                        return `
+                            <div class="card">
+                                <div class="service-icon">
+                                    <i class="${icon}"></i>
+                                </div>
+                                <h3>${service.name}</h3>
+                                <p>${service.description}</p>
+                                <div class="price">¥${service.price}</div>
+                                <p>时长: ${service.duration}</p>
+                                <button class="add-to-cart" onclick="addToCart('service', ${service.id})">
+                                    预约服务
+                                </button>
+                            </div>
+                        `;
+                    }).join('');
+                });
+        }
+
+        // 添加获取服务图标的函数
+        function getServiceIcon(serviceName) {
+            const icons = {
+                '宠物洗澡': 'fas fa-bath',
+                '宠物美容': 'fas fa-cut',
+                '宠物寄养': 'fas fa-home',
+                '宠物健康检查': 'fas fa-stethoscope',
+                '宠物训练课': 'fas fa-graduation-cap'
+            };
+            return icons[serviceName] || 'fas fa-paw';
+        }
+
+        // 切换显示不同部分
+        function showSection(section) {
+            document.getElementById('products-section').style.display = 'none';
+            document.getElementById('services-section').style.display = 'none';
+            document.getElementById('orders-section').style.display = 'none';
+            document.getElementById(`${section}-section`).style.display = 'block';
+
+            if (section === 'orders') {
+                loadOrders();
+            }
+        }
+
+        // 修改提示消息函数
+        function showToast(message, type = 'success') {
+            // 移除现有的提示
+            const existingToast = document.querySelector('.toast-message');
+            if (existingToast) {
+                existingToast.remove();
+            }
+
+            // 创建新提示
+            const toast = document.createElement('div');
+            toast.className = `toast-message ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            // 显示提示并添加动画
+            requestAnimationFrame(() => {
+                toast.classList.add('show');
+                toast.style.animation = 'toastIn 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+            });
+
+            // 自动隐藏
+            setTimeout(() => {
+                toast.style.animation = 'toastOut 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+                toast.addEventListener('animationend', () => {
+                    toast.remove();
+                });
+            }, 2000);
+        }
+
+        // 使用示例
+        // 成功提示
+        function showSuccessToast(message) {
+            showToast(message, 'success');
+        }
+
+        // 错误提示
+        function showErrorToast(message) {
+            showToast(message, 'error');
+        }
+
+        // 修改添加到购物车函数
+        function addToCart(type, id) {
+            const userId = localStorage.getItem('userId');
+            if (!userId) {
+                showToast('请先登录', 'error');
+                return;
+            }
+
+            const data = {
+                user_id: userId,
+                quantity: 1
+            };
+
+            if (type === 'product') {
+                data.product_id = id;
+            } else {
+                data.service_id = id;
+            }
+
+            // 获取点击的按钮
+            const button = event.target;
+            button.classList.add('add-to-cart-animation');
+
+            fetch('/api/cart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.message) {
+                    button.classList.add('success');
+                    showToast(type === 'product' ? '已添加到购物车' : '已预约服务');
+                    loadCart();
+                    updateCartCount();
+                } else {
+                    showToast(result.error, 'error');
+                }
+            })
+            .finally(() => {
+                // 移除动画类
+                setTimeout(() => {
+                    button.classList.remove('add-to-cart-animation', 'success');
+                }, 500);
+            });
+        }
+
+        // 修改删除购物车项目函数
+        function removeFromCart(itemId) {
+            fetch(`/api/cart/${itemId}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    showToast('已从购物车移除');
+                    loadCart();
+                    updateCartCount();
+                } else {
+                    showToast(data.error, 'error');
+                }
+            });
+        }
+
+        // 修改结算函数
+        function checkout() {
+            const userId = localStorage.getItem('userId');
+            if (!userId) {
+                showToast('请先登录', 'error');
+                return;
+            }
+
+            fetch('/api/orders', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    user_id: userId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    showToast(`订单创建成功，总金额: ¥${data.total_amount}`, 'success');
+                    loadCart();
+                    updateCartCount();
+                    toggleCart();
+                    loadOrders();
+                } else {
+                    showToast(data.error, 'error');
+                }
+            })
+            .catch(error => {
+                showToast('结算失败，请重试', 'error');
+            });
+        }
+
+        // 更新购物车数量
+        function updateCartCount() {
+            const userId = localStorage.getItem('userId');
+            if (!userId) return;
+
+            fetch(`/api/cart?user_id=${userId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const count = (data.products?.length || 0) + (data.services?.length || 0);
+                    document.getElementById('cartCount').textContent = count;
+                    updateCartItems(data);
+                });
+        }
+
+        // 更新购物车项目
+        function updateCartItems(data) {
+            const cartItems = document.getElementById('cartItems');
+            let html = '';
+            let total = 0;
+
+            if (data.products) {
+                data.products.forEach(item => {
+                    html += `
+                        <div class="cart-item">
+                            <img src="${item.image_url || 'https://via.placeholder.com/60'}" alt="${item.name}">
+                            <div class="cart-item-info">
+                                <h4>${item.name}</h4>
+                                <p>¥${item.price} × ${item.quantity}</p>
+                            </div>
+                        </div>
+                    `;
+                    total += item.price * item.quantity;
+                });
+            }
+
+            if (data.services) {
+                data.services.forEach(item => {
+                    html += `
+                        <div class="cart-item">
+                            <div class="cart-item-info">
+                                <h4>${item.name}</h4>
+                                <p>¥${item.price}</p>
+                            </div>
+                        </div>
+                    `;
+                    total += item.price;
+                });
+            }
+
+            cartItems.innerHTML = html;
+            document.getElementById('cartTotal').textContent = `¥${total.toFixed(2)}`;
+        }
+
+        // 切换购物车显示
+        function toggleCart() {
+            const cartSidebar = document.getElementById('cartSidebar');
+            if (cartSidebar.classList.contains('active')) {
+                cartSidebar.classList.remove('active');
+            } else {
+                loadCart(); // 打开购物车时刷新内容
+                cartSidebar.classList.add('active');
+            }
+        }
+
+        // 加载订单
+        function loadOrders() {
+            fetch('/api/orders?user_id=1') // 这里需要改为实际的用户ID
+                .then(response => response.json())
+                .then(orders => {
+                    const container = document.getElementById('ordersContainer');
+                    container.innerHTML = orders.map(order => `
+                        <div class="card">
+                            <h3>订单号: ${order.id}</h3>
+                            <p>商品: ${order.products || '无'}</p>
+                            <p>服务: ${order.services || '无'}</p>
+                            <p>总金额: ¥${order.total_amount}</p>
+                            <p>状态: ${order.status}</p>
+                            <p>创建时间: ${new Date(order.create_time).toLocaleString()}</p>
+                        </div>
+                    `).join('');
+                });
+        }
+
+        // 退出登录
+        function logout() {
+            localStorage.removeItem('username');
+            window.location.href = '/';
+        }
+
+        // 修改加载购物车函数
+        function loadCart() {
+            const userId = localStorage.getItem('userId');
+            if (!userId) return;
+
+            fetch(`/api/cart?user_id=${userId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const cartContent = document.getElementById('cart-content');
+                    let html = '<h3>购物车</h3>';
+                    
+                    // 显示商品
+                    if (data.products && data.products.length > 0) {
+                        html += '<h4>商品</h4>';
+                        data.products.forEach(item => {
+                            html += `
+                                <div class="cart-item">
+                                    <span>${item.name}</span>
+                                    <span>数量: ${item.quantity}</span>
+                                    <span>单价: ¥${item.price}</span>
+                                    <span>小计: ¥${item.total_price}</span>
+                                </div>
+                            `;
+                        });
+                    }
+                    
+                    // 显示服务
+                    if (data.services && data.services.length > 0) {
+                        html += '<h4>服务</h4>';
+                        data.services.forEach(item => {
+                            html += `
+                                <div class="cart-item">
+                                    <span>${item.name}</span>
+                                    <span>价格: ¥${item.price}</span>
+                                </div>
+                            `;
+                        });
+                    }
+                    
+                    // 显示总金额
+                    html += `<div class="cart-total">总计: ¥${data.total_amount}</div>`;
+                    
+                    // 添加结算按钮
+                    if ((data.products && data.products.length > 0) || (data.services && data.services.length > 0)) {
+                        html += '<button onclick="createOrder()" class="checkout-btn">结算</button>';
+                    }
+                    
+                    cartContent.innerHTML = html;
+                });
+        }
+
+        // 修改创建订单函数
+        function createOrder() {
+            const userId = localStorage.getItem('userId');
+            if (!userId) {
+                showToast('请先登录', 'error');
+                return;
+            }
+
+            fetch(`/api/cart?user_id=${userId}`)
+                .then(response => response.json())
+                .then(cartData => {
+                    // 检查购物车是否为空
+                    if (!cartData.products?.length && !cartData.services?.length) {
+                        showToast('购物车是空的', 'error');
+                        return;
+                    }
+
+                    const orderData = {
+                        user_id: userId,
+                        products: cartData.products.map(item => ({
+                            id: item.product_id,
+                            quantity: item.quantity,
+                            price: item.price
+                        })),
+                        services: cartData.services.map(item => ({
+                            id: item.service_id,
+                            price: item.price,
+                            appointment_time: new Date().toISOString()
+                        }))
+                    };
+
+                    return fetch('/api/orders', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(orderData)
+                    });
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.message) {
+                        showToast(`订单创建成功，总金额: ¥${result.total_amount}`, 'success');
+                        loadCart(); // 刷新购物车
+                        updateCartCount(); // 更新购物车数量
+                        toggleCart(); // 关闭购物车侧边栏
+                        showSection('orders'); // 切换到订单页面
+                        loadOrders(); // 刷新订单列表
+                    } else {
+                        showToast(result.error, 'error');
+                    }
+                })
+                .catch(error => {
+                    showToast('创建订单失败，请重试', 'error');
+                });
+        }
+
+        // 修改加载订单列表函数
+        function loadOrders() {
+            const userId = localStorage.getItem('userId');
+            if (!userId) return;
+
+            fetch(`/api/orders?user_id=${userId}`)
+                .then(response => response.json())
+                .then(orders => {
+                    const ordersContainer = document.getElementById('ordersContainer');
+                    if (!orders.length) {
+                        ordersContainer.innerHTML = '<div class="order-card">暂无订单</div>';
+                        return;
+                    }
+
+                    ordersContainer.innerHTML = orders.map(order => `
+                        <div class="order-card">
+                            <h3>订单号: ${order.id}</h3>
+                            ${order.products ? `<p>商品: ${order.products}</p>` : ''}
+                            ${order.services ? `<p>服务: ${order.services}</p>` : ''}
+                            <p class="order-total">总金额: ¥${parseFloat(order.total_amount).toFixed(2)}</p>
+                            <p class="order-status">状态: ${getStatusName(order.status)}</p>
+                            <p class="order-time">创建时间: ${order.create_time}</p>
+                        </div>
+                    `).join('');
+                });
+        }
+
+        // 添加状态转换函数
+        function getStatusName(status) {
+            const statusMap = {
+                'pending': '待处理',
+                'paid': '已支付',
+                'completed': '已完成',
+                'cancelled': '已取消'
+            };
+            return statusMap[status] || status;
+        }
+    </script>
+</body>
+</html> 
